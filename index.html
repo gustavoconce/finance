@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finanças</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>try { document.documentElement.dataset.theme = localStorage.getItem("theme") || "dark"; } catch (e) {}</script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+<!-- LOGIN -->
+<section id="login-screen" class="login" hidden>
+    <form id="login-form" class="login-card" novalidate>
+        <div class="brand"><span class="brand-mark"><i data-lucide="wallet"></i></span><span>Finanças</span></div>
+        <h1>Acesso restrito</h1>
+        <p class="muted">Informe a senha para continuar.</p>
+        <label class="field">
+            <span>Senha</span>
+            <input type="password" id="login-password" autocomplete="current-password" required>
+        </label>
+        <p class="form-error" role="alert" hidden></p>
+        <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+    </form>
+</section>
+
+<!-- APP -->
+<div id="app" class="app" hidden>
+    <aside id="sidebar" class="sidebar" aria-label="Menu lateral">
+        <div class="brand"><span class="brand-mark"><i data-lucide="wallet"></i></span><span>Finanças</span></div>
+        <nav class="nav" aria-label="Navegação principal">
+            <span class="nav-group">Financeiro</span>
+            <button type="button" class="nav-item" data-view="dashboard"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></button>
+            <button type="button" class="nav-item" data-view="transactions"><i data-lucide="arrow-left-right"></i><span>Transações</span></button>
+            <span class="nav-group">Planejamento</span>
+            <button type="button" class="nav-item" data-view="wedding"><i data-lucide="heart"></i><span>Casamento</span></button>
+        </nav>
+        <button type="button" id="logout-btn" class="nav-item nav-bottom"><i data-lucide="log-out"></i><span>Sair</span></button>
+    </aside>
+    <div id="sidebar-backdrop" class="backdrop" hidden></div>
+
+    <main class="main">
+        <header class="header">
+            <button type="button" id="menu-btn" class="icon-btn menu-btn" aria-label="Abrir menu"><i data-lucide="menu"></i></button>
+            <div class="header-text">
+                <h1 id="page-title">Dashboard</h1>
+                <p id="page-description" class="muted"></p>
+            </div>
+            <div class="header-actions">
+                <span id="loader" class="spinner" role="status" aria-label="Carregando" hidden></span>
+                <button type="button" id="theme-toggle" class="icon-btn" aria-label="Alternar tema claro/escuro">
+                    <i data-lucide="sun" class="icon-sun"></i><i data-lucide="moon" class="icon-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- DASHBOARD -->
+        <section class="view" data-panel="dashboard">
+            <div class="section-head">
+                <div>
+                    <h2 id="dashboard-month">—</h2>
+                    <p class="muted">Resumo do mês atual</p>
+                </div>
+                <button type="button" class="btn btn-primary" data-action="new-transaction"><i data-lucide="plus"></i>Nova transação</button>
+            </div>
+
+            <div class="stats">
+                <article class="card stat">
+                    <span class="stat-label"><i data-lucide="wallet"></i>Saldo líquido do mês</span>
+                    <strong id="stat-balance" class="stat-value">—</strong>
+                    <span class="stat-sub muted">Acréscimos − débitos</span>
+                </article>
+                <article class="card stat">
+                    <span class="stat-label"><i data-lucide="trending-up"></i>Total de acréscimos</span>
+                    <strong id="stat-income" class="stat-value is-positive">—</strong>
+                    <span id="stat-income-sub" class="stat-sub muted"></span>
+                </article>
+                <article class="card stat">
+                    <span class="stat-label"><i data-lucide="trending-down"></i>Total de débitos</span>
+                    <strong id="stat-expense" class="stat-value is-negative">—</strong>
+                    <span id="stat-expense-sub" class="stat-sub muted"></span>
+                </article>
+                <article class="card stat">
+                    <span class="stat-label"><i data-lucide="target"></i>Meta de economia do mês</span>
+                    <strong id="stat-goal" class="stat-value">—</strong>
+                    <span id="stat-goal-sub" class="stat-sub muted"></span>
+                </article>
+            </div>
+
+            <div class="dashboard-grid">
+                <article class="card">
+                    <div class="card-head">
+                        <h3>Progresso da meta</h3>
+                        <button type="button" class="btn btn-ghost btn-sm" data-action="edit-goal"><i data-lucide="pencil"></i>Editar meta</button>
+                    </div>
+                    <div id="goal-content"></div>
+                </article>
+                <article class="card">
+                    <div class="card-head"><h3>Transações do mês</h3></div>
+                    <div id="dashboard-transactions"></div>
+                </article>
+            </div>
+        </section>
+
+        <!-- TRANSAÇÕES -->
+        <section class="view" data-panel="transactions" hidden>
+            <div class="section-head">
+                <label class="field field-inline">
+                    <span>Mês</span>
+                    <input type="month" id="transactions-month">
+                </label>
+                <button type="button" class="btn btn-primary" data-action="new-transaction"><i data-lucide="plus"></i>Nova transação</button>
+            </div>
+            <article class="card">
+                <div id="transactions-summary" class="summary-row"></div>
+                <div id="transactions-list"></div>
+            </article>
+        </section>
+
+        <!-- CASAMENTO -->
+        <section class="view" data-panel="wedding" hidden>
+            <div id="wedding-content"></div>
+        </section>
+    </main>
+</div>
+
+<!-- MODAL: NOVA TRANSAÇÃO -->
+<dialog id="transaction-modal" class="modal" aria-labelledby="transaction-modal-title">
+    <form id="transaction-form" novalidate>
+        <div class="modal-head">
+            <h2 id="transaction-modal-title">Nova transação</h2>
+            <button type="button" class="icon-btn" data-close aria-label="Fechar"><i data-lucide="x"></i></button>
+        </div>
+        <label class="field">
+            <span>Tipo</span>
+            <select id="tx-type" required></select>
+        </label>
+        <p id="tx-movement-hint" class="hint" hidden></p>
+        <label class="field">
+            <span>Valor</span>
+            <input type="text" id="tx-value" inputmode="decimal" placeholder="0,00" autocomplete="off" required>
+        </label>
+        <label class="field">
+            <span>Descrição</span>
+            <input type="text" id="tx-description" maxlength="200" placeholder="Ex.: Mercado" autocomplete="off">
+        </label>
+        <label class="field">
+            <span>Data</span>
+            <input type="date" id="tx-date" required>
+        </label>
+        <p class="form-error" role="alert" hidden></p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- MODAL: META -->
+<dialog id="goal-modal" class="modal" aria-labelledby="goal-modal-title">
+    <form id="goal-form" novalidate>
+        <div class="modal-head">
+            <h2 id="goal-modal-title">Meta de economia</h2>
+            <button type="button" class="icon-btn" data-close aria-label="Fechar"><i data-lucide="x"></i></button>
+        </div>
+        <p id="goal-modal-month" class="muted"></p>
+        <label class="field">
+            <span>Valor da meta</span>
+            <input type="text" id="goal-value" inputmode="decimal" placeholder="0,00" autocomplete="off" required>
+        </label>
+        <p class="form-error" role="alert" hidden></p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar meta</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- MODAL: CONFIGURAR DESPESA DO CASAMENTO -->
+<dialog id="wedding-modal" class="modal" aria-labelledby="wedding-modal-title">
+    <form id="wedding-form" novalidate>
+        <div class="modal-head">
+            <h2 id="wedding-modal-title">Configurar despesa</h2>
+            <button type="button" class="icon-btn" data-close aria-label="Fechar"><i data-lucide="x"></i></button>
+        </div>
+        <input type="hidden" id="wedding-sector">
+        <label class="field">
+            <span>Valor total</span>
+            <input type="text" id="wedding-total" inputmode="decimal" placeholder="0,00" autocomplete="off" required>
+        </label>
+        <label class="field">
+            <span>Número de parcelas</span>
+            <input type="number" id="wedding-installments" min="1" max="360" step="1" required>
+        </label>
+        <label class="field">
+            <span>Data do primeiro pagamento</span>
+            <input type="date" id="wedding-first-date" required>
+        </label>
+        <p id="wedding-preview" class="hint" hidden></p>
+        <p id="wedding-warning" class="hint is-warning" hidden>Salvar substituirá as parcelas atuais e os status de pagamento desta despesa.</p>
+        <p class="form-error" role="alert" hidden></p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar configuração</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- MODAL: CONFIRMAR EXCLUSÃO -->
+<dialog id="confirm-modal" class="modal" aria-labelledby="confirm-modal-title">
+    <form id="confirm-form" novalidate>
+        <div class="modal-head">
+            <h2 id="confirm-modal-title">Excluir transação</h2>
+            <button type="button" class="icon-btn" data-close aria-label="Fechar"><i data-lucide="x"></i></button>
+        </div>
+        <p id="confirm-message" class="muted" style="margin-bottom:16px"></p>
+        <p class="form-error" role="alert" hidden></p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+            <button type="submit" class="btn btn-danger">Excluir</button>
+        </div>
+    </form>
+</dialog>
+
+<div id="toasts" class="toasts" aria-live="polite"></div>
+</body>
+</html>
